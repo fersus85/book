@@ -7,8 +7,8 @@ from store.serializers import BookSerializer
 class BookSerializerTestCase(TestCase):
 
     def test_ser(self):
-        book1 = Book.objects.create(name='Test book 1', price=25)
-        book2 = Book.objects.create(name='Test book 2', price=55)
+        book1 = Book.objects.create(name='Test book 1', price=25, author='F')
+        book2 = Book.objects.create(name='Test book 2', price=55, author='F')
         data = BookSerializer([book1, book2], many=True).data
         expected_data = [
             {
@@ -16,12 +16,15 @@ class BookSerializerTestCase(TestCase):
                 'name': 'Test book 1',
                 'price': '25.00',
                 'author': 'F',
+                'owner': None
             },
             {
                 'id': book2.id,
                 'name': 'Test book 2',
                 'price': '55.00',
                 'author': 'F',
+                'owner': None
             }
         ]
+
         self.assertEqual(expected_data, data)
