@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from store.models import Book
+from store.models import Book, UserBookRelation
 from store.serializers import BookSerializer
 
 
@@ -94,3 +94,24 @@ class BookApiTestCase(APITestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.book1.refresh_from_db()
         self.assertEqual(80, self.book1.price)
+
+
+class BooksRelationTestCase(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='user1')
+        self.user2 = User.objects.create(username='user2')
+        self.book1 = Book.objects.create(name='Test book 1', price=25, author='author1', owner=self.user,)
+        self.book2 = Book.objects.create(name='Test book 2', price=55, author='author5')
+
+    def test_like(self):
+        url = reverse('userbookrelation-detail', args=(self.book1.id,))
+        data = {
+            'like': True,
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user)
+        response = self.client.patch(url, data=json_data, content_type='application/json')
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        relation = UserBookRelation.objects.get(user=self.user, book=self.book1)
+        self.assertTrue(relation.like)
